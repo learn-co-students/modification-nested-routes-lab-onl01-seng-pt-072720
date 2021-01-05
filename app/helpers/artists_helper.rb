@@ -10,5 +10,11 @@ module ArtistsHelper
       select_tag "song[artist_id]", options_from_collection_for_select(Artist.all, :id, :name)
     end
   end
-  
+
+  def display_name(song)
+    if song.artist
+      song.artist.name
+    end
+  end
+
 end
