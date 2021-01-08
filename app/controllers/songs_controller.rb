@@ -24,11 +24,21 @@ class SongsController < ApplicationController
     end
   end
 
+  # GET route, making a new song with artist
   def new
-    @song = Song.new
+    # @song = Song.new /artists/:artist_id
+    # binding.pry
+    @artist = Artist.find_by_id(params[:artist_id])
+   if @artist
+    @song = Song.new(artist_id: @artist.id)
+   else 
+      redirect_to artists_path
+   end
   end
 
+  # POST route, creating the new song.
   def create
+    # binding.pry
     @song = Song.new(song_params)
 
     if @song.save
@@ -38,17 +48,29 @@ class SongsController < ApplicationController
     end
   end
 
+  # get route, show edit form.
   def edit
-    @song = Song.find(params[:id])
+    if params[:artist_id]
+      artist = Artist.find_by(id: params[:artist_id])
+      if artist.nil?
+        redirect_to artists_path, alert: "Artist not found"
+      else
+        @song = artist.songs.find_by(id: params[:id])
+        redirect_to artist_songs_path(artist), alert: "Song not found" if @song.nil?
+      end
+    else
+      @song = Song.find(params[:id])
+    end
   end
 
+  # POST route, updates edit form
   def update
     @song = Song.find(params[:id])
 
     @song.update(song_params)
 
     if @song.save
-      redirect_to @song
+      redirect_to artist_songs_path(@artist)
     else
       render :edit
     end
@@ -64,7 +86,9 @@ class SongsController < ApplicationController
   private
 
   def song_params
-    params.require(:song).permit(:title, :artist_name)
+    params.require(:song).permit(:title, :artist_name, :artist_id)
   end
+
+ 
 end
 
